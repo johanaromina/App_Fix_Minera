@@ -1,0 +1,42 @@
+{
+  "name": "tfg-mineria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestión para minería - TFG",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "infra:logs": "docker compose -f infra/docker/docker-compose.yml logs -f",
+    "db:gen": "cd services/api && npx prisma generate",
+    "db:migrate": "cd services/api && npx prisma migrate dev --name init",
+    "db:reset": "cd services/api && npx prisma migrate reset --force",
+    "db:studio": "cd services/api && npx prisma studio",
+    "api:dev": "cd services/api && npm run dev",
+    "api:build": "cd services/api && npm run build",
+    "api:start": "cd services/api && npm start",
+    "web:dev": "cd apps/web && npm run dev",
+    "web:build": "cd apps/web && npm run build",
+    "web:preview": "cd apps/web && npm run preview",
+    "mobile:dev": "cd apps/mobile && npm run start",
+    "mobile:android": "cd apps/mobile && npm run android",
+    "mobile:ios": "cd apps/mobile && npm run ios",
+    "dev": "concurrently \"npm run api:dev\" \"npm run web:dev\"",
+    "build": "npm run api:build && npm run web:build",
+    "install:all": "npm install && npm run install:apps && npm run install:services && npm run install:packages",
+    "install:apps": "cd apps/web && npm install && cd ../mobile && npm install",
+    "install:services": "cd services/api && npm install",
+    "install:packages": "cd packages/sdk && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

@@ -10,287 +10,300 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id            String   @id @default(uuid())
+model Usuarios {
+  id            String   @id
   nombre        String
   email         String   @unique
   password_hash String
   activo        Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
-  
-  roles         UsuarioRol[]
-  incidencias_reportadas Incidencia[] @relation("reporta")
-  incidencias_atendidas  Incidencia[] @relation("atiende")
-  movimientos   MovimientoInventario[]
-  
+
+  // Relaciones
+  roles                UsuarioRoles[]
+  incidencias_reporta  Incidencias[] @relation("UsuarioReporta")
+  incidencias_atiende  Incidencias[] @relation("UsuarioAtiende")
+  movimientos_inventario MovimientosInventario[]
+
   @@map("usuarios")
 }
 
-model Rol {
-  id        Int    @id @default(autoincrement())
-  nombre    String @unique
+model Roles {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
   descripcion String?
-  created_at DateTime @default(now())
-  
-  usuarios UsuarioRol[]
-  
+  created_at  DateTime @default(now())
+
+  // Relaciones
+  usuarios UsuarioRoles[]
+
   @@map("roles")
 }
 
-model UsuarioRol {
+model UsuarioRoles {
   usuarioId String
   rolId     Int
   created_at DateTime @default(now())
-  
-  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Cascade)
-  
+
+  usuario Usuarios @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rol     Roles    @relation(fields: [rolId], references: [id], onDelete: Cascade)
+
   @@id([usuarioId, rolId])
   @@map("usuario_roles")
 }
 
-model Sitio {
-  id          Int        @id @default(autoincrement())
-  nombre      String
+model Sitios {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
   descripcion String?
-  lat         Decimal    @db.Decimal(10,6)
-  lng         Decimal    @db.Decimal(10,6)
-  activo      Boolean    @default(true)
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
-  
-  incidencias Incidencia[]
-  items       InventarioItem[]
-  sensores    Sensor[]
-  mantos      Mantenimiento[]
-  
+  lat         Decimal  @db.Decimal(10, 6)
+  lng         Decimal  @db.Decimal(10, 6)
+  activo      Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relaciones
+  incidencias        Incidencias[]
+  inventario_items   InventarioItems[]
+  mantenimientos     Mantenimientos[]
+  sensores           Sensores[]
+
   @@map("sitios")
 }
 
-enum Prioridad { 
-  baja 
-  media 
-  alta 
-  critica 
-}
-
-enum EstadoIncidencia { 
-  abierta 
-  en_proceso 
-  cerrada 
-  cancelada 
-}
-
-enum EstadoItem { 
-  operativo 
-  fuera_de_servicio 
-  mantenimiento 
-  baja 
-}
-
-enum TipoMovimiento { 
-  alta 
-  baja 
-  entrega 
-  devolucion 
-  transferencia 
-}
-
-enum Frecuencia { 
-  diaria 
-  semanal 
-  mensual 
-  trimestral 
-  semestral 
-  anual 
-}
-
-enum ResultadoManto { 
-  ok 
-  con_observaciones 
-  pendiente 
-  cancelado 
-}
-
-enum TipoSensor { 
-  temperatura 
-  vibracion 
-  energia 
-  presion 
-  humedad 
-  flujo 
-}
-
-enum NivelAlerta { 
-  info 
-  warning 
-  critical 
-}
-
-model Incidencia {
-  id             String          @id @default(uuid())
-  titulo         String
-  descripcion    String?
-  prioridad      Prioridad
-  estado         EstadoIncidencia @default(abierta)
-  fecha_creacion DateTime         @default(now())
-  fecha_cierre   DateTime?
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
-  
+model Incidencias {
+  id                String   @id
+  titulo            String
+  descripcion       String?
+  prioridad         Prioridad
+  estado            Estado   @default(abierta)
+  fecha_creacion    DateTime @default(now())
+  fecha_cierre      DateTime?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
   usuario_reporta_id String
   usuario_atiende_id String?
-  sitio_id       Int
+  sitio_id          Int
 
-  reporta  Usuario @relation("reporta", fields: [usuario_reporta_id], references: [id])
-  atiende  Usuario? @relation("atiende", fields: [usuario_atiende_id], references: [id])
-  sitio    Sitio   @relation(fields: [sitio_id], references: [id])
-  anexos   AnexoIncidencia[]
-  notifs   Notificacion[]
-  alertaDe AlertaIoT?
-  
+  // Relaciones
+  usuario_reporta Usuarios @relation("UsuarioReporta", fields: [usuario_reporta_id], references: [id])
+  usuario_atiende Usuarios? @relation("UsuarioAtiende", fields: [usuario_atiende_id], references: [id])
+  sitio           Sitios   @relation(fields: [sitio_id], references: [id])
+  anexos          AnexosIncidencias[]
+  notificaciones  Notificaciones[]
+  alertas_iot     AlertasIot[]
+
   @@map("incidencias")
 }
 
-model AnexoIncidencia {
-  id            String   @id @default(uuid())
+model AnexosIncidencias {
+  id            String   @id
   incidencia_id String
   ruta_archivo  String
   nombre_archivo String
   tipo_mime     String?
-  tamaño        Int?
+  tamano        Int?
   created_at    DateTime @default(now())
-  
-  incidencia    Incidencia @relation(fields: [incidencia_id], references: [id], onDelete: Cascade)
-  
+
+  // Relaciones
+  incidencia Incidencias @relation(fields: [incidencia_id], references: [id], onDelete: Cascade)
+
   @@map("anexos_incidencias")
 }
 
-model InventarioItem {
-  id        String    @id @default(uuid())
-  sitio_id  Int
-  tipo      String
-  marca     String?
-  modelo    String?
-  nro_serie String?
-  codigo_qr String    @unique
-  estado    EstadoItem @default(operativo)
+model InventarioItems {
+  id         String   @id
+  sitio_id   Int
+  tipo       String
+  marca      String?
+  modelo     String?
+  nro_serie  String?
+  codigo_qr  String   @unique
+  estado     EstadoItem @default(operativo)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
-  sitio     Sitio     @relation(fields: [sitio_id], references: [id])
-  movimientos MovimientoInventario[]
-  mantos     Mantenimiento[]
-  
+
+  // Relaciones
+  sitio      Sitios                @relation(fields: [sitio_id], references: [id])
+  movimientos MovimientosInventario[]
+  mantenimientos Mantenimientos[]
+
   @@map("inventario_items")
 }
 
-model MovimientoInventario {
-  id         String @id @default(uuid())
-  item_id    String
-  usuario_id String
-  fecha      DateTime @default(now())
-  tipo       TipoMovimiento
+model MovimientosInventario {
+  id          String      @id
+  item_id     String
+  usuario_id  String
+  fecha       DateTime    @default(now())
+  tipo        TipoMovimiento
   observacion String?
-  created_at DateTime @default(now())
-  
-  item       InventarioItem @relation(fields: [item_id], references: [id])
-  usuario    Usuario       @relation(fields: [usuario_id], references: [id])
-  
+  created_at  DateTime    @default(now())
+
+  // Relaciones
+  item    InventarioItems @relation(fields: [item_id], references: [id])
+  usuario Usuarios        @relation(fields: [usuario_id], references: [id])
+
   @@map("movimientos_inventario")
 }
 
-model PlanMantenimiento {
-  id         String @id @default(uuid())
-  nombre     String
+model PlanesMantenimiento {
+  id          String      @id
+  nombre      String
   descripcion String?
-  frecuencia Frecuencia
-  activo     Boolean @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  
-  mantos     Mantenimiento[]
-  
+  frecuencia  Frecuencia
+  activo      Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  // Relaciones
+  mantenimientos Mantenimientos[]
+
   @@map("planes_mantenimiento")
 }
 
-model Mantenimiento {
-  id            String @id @default(uuid())
-  plan_id       String
-  sitio_id      Int
-  item_id       String?
-  fecha_plan    DateTime
+model Mantenimientos {
+  id              String        @id
+  plan_id         String
+  sitio_id        Int
+  item_id         String?
+  fecha_plan      DateTime
   fecha_ejecucion DateTime?
-  resultado     ResultadoManto @default(pendiente)
-  observacion   String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  
-  plan          PlanMantenimiento @relation(fields: [plan_id], references: [id])
-  sitio         Sitio            @relation(fields: [sitio_id], references: [id])
-  item          InventarioItem?  @relation(fields: [item_id], references: [id])
-  
+  resultado       Resultado     @default(pendiente)
+  observacion     String?
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  // Relaciones
+  plan  PlanesMantenimiento @relation(fields: [plan_id], references: [id])
+  sitio Sitios              @relation(fields: [sitio_id], references: [id])
+  item  InventarioItems?    @relation(fields: [item_id], references: [id])
+
   @@map("mantenimientos")
 }
 
-model Sensor {
-  id        String @id @default(uuid())
-  sitio_id  Int
-  tipo      TipoSensor
+model Sensores {
+  id          String    @id
+  sitio_id    Int
+  tipo        TipoSensor
   descripcion String?
-  activo    Boolean @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  
-  sitio     Sitio   @relation(fields: [sitio_id], references: [id])
-  lecturas  LecturaSensor[]
-  alertas   AlertaIoT[]
-  
+  activo      Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // Relaciones
+  sitio     Sitios           @relation(fields: [sitio_id], references: [id])
+  lecturas  LecturasSensores[]
+  alertas   AlertasIot[]
+
   @@map("sensores")
 }
 
-model LecturaSensor {
-  id        String   @id @default(uuid())
+model LecturasSensores {
+  id        String   @id
   sensor_id String
   timestamp DateTime @default(now())
-  valor     Decimal  @db.Decimal(12,4)
+  valor     Decimal  @db.Decimal(12, 4)
   unidad    String
   created_at DateTime @default(now())
-  
-  sensor    Sensor   @relation(fields: [sensor_id], references: [id], onDelete: Cascade)
-  
+
+  // Relaciones
+  sensor Sensores @relation(fields: [sensor_id], references: [id], onDelete: Cascade)
+
   @@map("lecturas_sensores")
 }
 
-model Notificacion {
-  id            String   @id @default(uuid())
+model Notificaciones {
+  id           String   @id
   incidencia_id String
-  tipo          String
-  destinatario  String
-  mensaje       String?
-  enviada       Boolean  @default(false)
-  timestamp     DateTime @default(now())
-  created_at    DateTime @default(now())
-  
-  incidencia    Incidencia @relation(fields: [incidencia_id], references: [id], onDelete: Cascade)
-  
+  tipo         String
+  destinatario String
+  mensaje      String?
+  enviada      Boolean  @default(false)
+  timestamp    DateTime @default(now())
+  created_at   DateTime @default(now())
+
+  // Relaciones
+  incidencia Incidencias @relation(fields: [incidencia_id], references: [id], onDelete: Cascade)
+
   @@map("notificaciones")
 }
 
-model AlertaIoT {
-  id          String     @id @default(uuid())
-  sensor_id   String
-  tipo        String
-  nivel       NivelAlerta
-  timestamp   DateTime   @default(now())
-  detalle     String?
-  resuelta    Boolean    @default(false)
-  incidencia_id String?   // si generó ticket preventivo
-  created_at  DateTime   @default(now())
-  
-  sensor      Sensor     @relation(fields: [sensor_id], references: [id])
-  incidencia  Incidencia? @relation(fields: [incidencia_id], references: [id])
-  
+model AlertasIot {
+  id           String    @id
+  sensor_id    String
+  tipo         String
+  nivel        NivelAlerta
+  timestamp    DateTime  @default(now())
+  detalle      String?
+  resuelta     Boolean   @default(false)
+  incidencia_id String?
+  created_at   DateTime  @default(now())
+
+  // Relaciones
+  sensor     Sensores    @relation(fields: [sensor_id], references: [id])
+  incidencia Incidencias? @relation(fields: [incidencia_id], references: [id])
+
   @@map("alertas_iot")
+}
+
+// Enums
+enum Prioridad {
+  baja
+  media
+  alta
+  critica
+}
+
+enum Estado {
+  abierta
+  en_proceso
+  cerrada
+  cancelada
+}
+
+enum EstadoItem {
+  operativo
+  fuera_de_servicio
+  mantenimiento
+  baja
+}
+
+enum TipoMovimiento {
+  alta
+  baja
+  entrega
+  devolucion
+  transferencia
+}
+
+enum Frecuencia {
+  diaria
+  semanal
+  mensual
+  trimestral
+  semestral
+  anual
+}
+
+enum Resultado {
+  ok
+  con_observaciones
+  pendiente
+  cancelado
+}
+
+enum TipoSensor {
+  temperatura
+  vibracion
+  energia
+  presion
+  humedad
+  flujo
+}
+
+enum NivelAlerta {
+  info
+  warning
+  critical
 }

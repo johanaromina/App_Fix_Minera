@@ -1,0 +1,1159 @@
+openapi: 3.0.0
+info:
+  title: TFG Mineria API
+  description: API REST para sistema de gestión minera
+  version: 1.0.0
+  contact:
+    name: Gerardo
+    email: gerardo@tfgmineria.com
+servers:
+  - url: http://localhost:4000/api
+    description: Servidor de desarrollo
+  - url: https://api.tfgmineria.com/api
+    description: Servidor de producción
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Autentica un usuario y devuelve tokens de acceso
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@tfgmineria.com
+                password:
+                  type: string
+                  example: admin123
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar usuario
+      description: Crea un nuevo usuario en el sistema
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - password
+              properties:
+                nombre:
+                  type: string
+                  example: Juan Pérez
+                email:
+                  type: string
+                  format: email
+                  example: juan@tfgmineria.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registered successfully
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+
+  /usuarios:
+    get:
+      tags:
+        - Usuarios
+      summary: Listar usuarios
+      description: Obtiene la lista de usuarios con paginación
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      usuarios:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Usuarios
+      summary: Crear usuario
+      description: Crea un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - password
+              properties:
+                nombre:
+                  type: string
+                  example: María García
+                email:
+                  type: string
+                  format: email
+                  example: maria@tfgmineria.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /sitios:
+    get:
+      tags:
+        - Sitios
+      summary: Listar sitios
+      description: Obtiene la lista de sitios
+      responses:
+        '200':
+          description: Lista de sitios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sitio'
+
+    post:
+      tags:
+        - Sitios
+      summary: Crear sitio
+      description: Crea un nuevo sitio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - lat
+                - lng
+              properties:
+                nombre:
+                  type: string
+                  example: Iglesia - Sitio 3
+                descripcion:
+                  type: string
+                  example: Sitio de extracción en Iglesia
+                lat:
+                  type: number
+                  format: float
+                  example: -30.25
+                lng:
+                  type: number
+                  format: float
+                  example: -69.14
+      responses:
+        '201':
+          description: Sitio creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Sitio created successfully
+                  data:
+                    $ref: '#/components/schemas/Sitio'
+
+  /incidencias:
+    get:
+      tags:
+        - Incidencias
+      summary: Listar incidencias
+      description: Obtiene la lista de incidencias con filtros
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: prioridad
+          in: query
+          schema:
+            type: string
+            enum: [baja, media, alta, critica]
+        - name: estado
+          in: query
+          schema:
+            type: string
+            enum: [abierta, en_proceso, cerrada, cancelada]
+        - name: sitio_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de incidencias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      incidencias:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Incidencia'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Incidencias
+      summary: Crear incidencia
+      description: Crea una nueva incidencia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - titulo
+                - prioridad
+                - sitio_id
+              properties:
+                titulo:
+                  type: string
+                  example: Falla en bomba principal
+                descripcion:
+                  type: string
+                  example: La bomba presenta ruido anormal
+                prioridad:
+                  type: string
+                  enum: [baja, media, alta, critica]
+                  example: critica
+                sitio_id:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Incidencia creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Incidencia created successfully
+                  data:
+                    $ref: '#/components/schemas/Incidencia'
+
+  /incidencias/{id}:
+    patch:
+      tags:
+        - Incidencias
+      summary: Actualizar incidencia
+      description: Actualiza el estado o comentarios de una incidencia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                  enum: [abierta, en_proceso, cerrada, cancelada]
+                observacion:
+                  type: string
+      responses:
+        '200':
+          description: Incidencia actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Incidencia updated successfully
+                  data:
+                    $ref: '#/components/schemas/Incidencia'
+
+  /inventario/items:
+    get:
+      tags:
+        - Inventario
+      summary: Listar items de inventario
+      description: Obtiene la lista de items de inventario
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: tipo
+          in: query
+          schema:
+            type: string
+        - name: estado
+          in: query
+          schema:
+            type: string
+            enum: [operativo, fuera_de_servicio, mantenimiento, baja]
+        - name: sitio_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de items de inventario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InventarioItem'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Inventario
+      summary: Crear item de inventario
+      description: Crea un nuevo item de inventario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tipo
+                - sitio_id
+                - codigo_qr
+              properties:
+                tipo:
+                  type: string
+                  example: Bomba
+                marca:
+                  type: string
+                  example: Grundfos
+                modelo:
+                  type: string
+                  example: CR 32-4
+                nro_serie:
+                  type: string
+                  example: GR123456
+                codigo_qr:
+                  type: string
+                  example: QR001
+                sitio_id:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Item creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Item created successfully
+                  data:
+                    $ref: '#/components/schemas/InventarioItem'
+
+  /inventario/movimientos:
+    post:
+      tags:
+        - Inventario
+      summary: Crear movimiento de inventario
+      description: Registra un movimiento de inventario (entrada, salida, entrega, devolución)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - item_id
+                - tipo
+              properties:
+                item_id:
+                  type: string
+                  example: item-001
+                tipo:
+                  type: string
+                  enum: [alta, baja, entrega, devolucion, transferencia]
+                  example: entrega
+                observacion:
+                  type: string
+                  example: Entrega a sector A
+      responses:
+        '201':
+          description: Movimiento creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Movimiento created successfully
+                  data:
+                    $ref: '#/components/schemas/MovimientoInventario'
+
+  /mantenimientos/planes:
+    get:
+      tags:
+        - Mantenimiento
+      summary: Listar planes de mantenimiento
+      description: Obtiene la lista de planes de mantenimiento
+      responses:
+        '200':
+          description: Lista de planes de mantenimiento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlanMantenimiento'
+
+    post:
+      tags:
+        - Mantenimiento
+      summary: Crear plan de mantenimiento
+      description: Crea un nuevo plan de mantenimiento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - frecuencia
+              properties:
+                nombre:
+                  type: string
+                  example: Mantenimiento Preventivo Bombas
+                descripcion:
+                  type: string
+                  example: Mantenimiento mensual de bombas principales
+                frecuencia:
+                  type: string
+                  enum: [diaria, semanal, mensual, trimestral, semestral, anual]
+                  example: mensual
+      responses:
+        '201':
+          description: Plan creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Plan created successfully
+                  data:
+                    $ref: '#/components/schemas/PlanMantenimiento'
+
+  /mantenimientos/tareas:
+    post:
+      tags:
+        - Mantenimiento
+      summary: Programar mantenimiento
+      description: Programa una nueva tarea de mantenimiento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - plan_id
+                - sitio_id
+                - fecha_plan
+              properties:
+                plan_id:
+                  type: string
+                  example: plan-001
+                sitio_id:
+                  type: integer
+                  example: 1
+                item_id:
+                  type: string
+                  example: item-001
+                fecha_plan:
+                  type: string
+                  format: date-time
+                  example: "2024-02-01T08:00:00Z"
+      responses:
+        '201':
+          description: Mantenimiento programado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Mantenimiento scheduled successfully
+                  data:
+                    $ref: '#/components/schemas/Mantenimiento'
+
+  /iot/sensores:
+    get:
+      tags:
+        - IoT
+      summary: Listar sensores
+      description: Obtiene la lista de sensores IoT
+      responses:
+        '200':
+          description: Lista de sensores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sensor'
+
+    post:
+      tags:
+        - IoT
+      summary: Crear sensor
+      description: Crea un nuevo sensor IoT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sitio_id
+                - tipo
+              properties:
+                sitio_id:
+                  type: integer
+                  example: 1
+                tipo:
+                  type: string
+                  enum: [temperatura, vibracion, energia, presion, humedad, flujo]
+                  example: temperatura
+                descripcion:
+                  type: string
+                  example: Sensor de temperatura bomba principal
+      responses:
+        '201':
+          description: Sensor creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Sensor created successfully
+                  data:
+                    $ref: '#/components/schemas/Sensor'
+
+  /iot/lecturas:
+    post:
+      tags:
+        - IoT
+      summary: Registrar lectura de sensor
+      description: Registra una nueva lectura de sensor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sensor_id
+                - valor
+                - unidad
+              properties:
+                sensor_id:
+                  type: string
+                  example: sensor-001
+                valor:
+                  type: number
+                  format: float
+                  example: 45.5
+                unidad:
+                  type: string
+                  example: "°C"
+      responses:
+        '201':
+          description: Lectura registrada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Lectura registered successfully
+                  data:
+                    $ref: '#/components/schemas/LecturaSensor'
+
+  /iot/alertas:
+    get:
+      tags:
+        - IoT
+      summary: Listar alertas IoT
+      description: Obtiene la lista de alertas generadas por sensores
+      parameters:
+        - name: nivel
+          in: query
+          schema:
+            type: string
+            enum: [info, warning, critical]
+        - name: resuelta
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Lista de alertas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AlertaIoT'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "user-001"
+        nombre:
+          type: string
+          example: "Juan Pérez"
+        email:
+          type: string
+          format: email
+          example: "juan@tfgmineria.com"
+        activo:
+          type: boolean
+          example: true
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["admin", "supervisor"]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Sitio:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: "Planta Principal"
+        descripcion:
+          type: string
+          example: "Planta principal de procesamiento"
+        lat:
+          type: number
+          format: float
+          example: -33.4489
+        lng:
+          type: number
+          format: float
+          example: -70.6693
+        activo:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Incidencia:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "inc-001"
+        titulo:
+          type: string
+          example: "Falla en bomba principal"
+        descripcion:
+          type: string
+          example: "La bomba presenta ruido anormal"
+        prioridad:
+          type: string
+          enum: [baja, media, alta, critica]
+          example: "critica"
+        estado:
+          type: string
+          enum: [abierta, en_proceso, cerrada, cancelada]
+          example: "abierta"
+        fecha_creacion:
+          type: string
+          format: date-time
+        fecha_cierre:
+          type: string
+          format: date-time
+        usuario_reporta_id:
+          type: string
+          example: "user-001"
+        usuario_atiende_id:
+          type: string
+          example: "user-002"
+        sitio_id:
+          type: integer
+          example: 1
+        sitio:
+          $ref: '#/components/schemas/Sitio'
+        reporta:
+          $ref: '#/components/schemas/User'
+        atiende:
+          $ref: '#/components/schemas/User'
+
+    InventarioItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "item-001"
+        sitio_id:
+          type: integer
+          example: 1
+        tipo:
+          type: string
+          example: "Bomba"
+        marca:
+          type: string
+          example: "Grundfos"
+        modelo:
+          type: string
+          example: "CR 32-4"
+        nro_serie:
+          type: string
+          example: "GR123456"
+        codigo_qr:
+          type: string
+          example: "QR001"
+        estado:
+          type: string
+          enum: [operativo, fuera_de_servicio, mantenimiento, baja]
+          example: "operativo"
+        sitio:
+          $ref: '#/components/schemas/Sitio'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MovimientoInventario:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "mov-001"
+        item_id:
+          type: string
+          example: "item-001"
+        usuario_id:
+          type: string
+          example: "user-001"
+        fecha:
+          type: string
+          format: date-time
+        tipo:
+          type: string
+          enum: [alta, baja, entrega, devolucion, transferencia]
+          example: "entrega"
+        observacion:
+          type: string
+          example: "Entrega a sector A"
+        item:
+          $ref: '#/components/schemas/InventarioItem'
+        usuario:
+          $ref: '#/components/schemas/User'
+
+    PlanMantenimiento:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "plan-001"
+        nombre:
+          type: string
+          example: "Mantenimiento Preventivo Bombas"
+        descripcion:
+          type: string
+          example: "Mantenimiento mensual de bombas principales"
+        frecuencia:
+          type: string
+          enum: [diaria, semanal, mensual, trimestral, semestral, anual]
+          example: "mensual"
+        activo:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Mantenimiento:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "mant-001"
+        plan_id:
+          type: string
+          example: "plan-001"
+        sitio_id:
+          type: integer
+          example: 1
+        item_id:
+          type: string
+          example: "item-001"
+        fecha_plan:
+          type: string
+          format: date-time
+        fecha_ejecucion:
+          type: string
+          format: date-time
+        resultado:
+          type: string
+          enum: [ok, con_observaciones, pendiente, cancelado]
+          example: "pendiente"
+        observacion:
+          type: string
+          example: "Mantenimiento completado sin observaciones"
+        plan:
+          $ref: '#/components/schemas/PlanMantenimiento'
+        sitio:
+          $ref: '#/components/schemas/Sitio'
+        item:
+          $ref: '#/components/schemas/InventarioItem'
+
+    Sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "sensor-001"
+        sitio_id:
+          type: integer
+          example: 1
+        tipo:
+          type: string
+          enum: [temperatura, vibracion, energia, presion, humedad, flujo]
+          example: "temperatura"
+        descripcion:
+          type: string
+          example: "Sensor de temperatura bomba principal"
+        activo:
+          type: boolean
+          example: true
+        sitio:
+          $ref: '#/components/schemas/Sitio'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LecturaSensor:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "lect-001"
+        sensor_id:
+          type: string
+          example: "sensor-001"
+        timestamp:
+          type: string
+          format: date-time
+        valor:
+          type: number
+          format: float
+          example: 45.5
+        unidad:
+          type: string
+          example: "°C"
+        sensor:
+          $ref: '#/components/schemas/Sensor'
+
+    AlertaIoT:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "alert-001"
+        sensor_id:
+          type: string
+          example: "sensor-001"
+        tipo:
+          type: string
+          example: "temperatura_alta"
+        nivel:
+          type: string
+          enum: [info, warning, critical]
+          example: "warning"
+        timestamp:
+          type: string
+          format: date-time
+        detalle:
+          type: string
+          example: "Temperatura por encima del umbral normal"
+        resuelta:
+          type: boolean
+          example: false
+        incidencia_id:
+          type: string
+          example: "inc-001"
+        sensor:
+          $ref: '#/components/schemas/Sensor'
+        incidencia:
+          $ref: '#/components/schemas/Incidencia'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 10
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error message"
+        errors:
+          type: array
+          items:
+            type: string
+          example: ["Validation error 1", "Validation error 2"]

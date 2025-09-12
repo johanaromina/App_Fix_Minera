@@ -1,0 +1,22 @@
+{
+  "name": "@tfg-mineria/sdk",
+  "version": "1.0.0",
+  "description": "SDK compartido para comunicación HTTP con la API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.5"
+  },
+  "peerDependencies": {
+    "axios": "^1.6.2"
+  }
+}

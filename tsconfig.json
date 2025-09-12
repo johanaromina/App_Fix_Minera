@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/mobile"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./packages/sdk"
+    }
+  ],
+  "extends": "expo/tsconfig.base"
+}

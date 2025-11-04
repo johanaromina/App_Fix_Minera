@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { MapPin, Layers, Filter } from 'lucide-react';
 
 const Mapa: React.FC = () => {

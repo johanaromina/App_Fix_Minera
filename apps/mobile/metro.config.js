@@ -1,6 +1,9 @@
 const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
 
+// Configurar variable de entorno
+process.env.EXPO_ROUTER_APP_ROOT = './app';
+
 const projectRoot = __dirname;
 const config = getDefaultConfig(projectRoot);
 

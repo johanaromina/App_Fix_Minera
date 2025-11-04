@@ -19,6 +19,7 @@ interface AuthState {
   logout: () => void;
   refreshAuth: () => Promise<void>;
   setLoading: (loading: boolean) => void;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -86,6 +87,35 @@ export const useAuthStore = create<AuthState>()(
 
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
+      },
+
+      initialize: async () => {
+        const { refreshToken, isAuthenticated } = get();
+        
+        // Si ya está autenticado, no hacer nada
+        if (isAuthenticated) {
+          set({ isLoading: false });
+          return;
+        }
+
+        // Si hay refresh token, intentar renovar
+        if (refreshToken) {
+          try {
+            await get().refreshAuth();
+          } catch (error) {
+            // Si falla la renovación, limpiar el estado
+            set({
+              user: null,
+              accessToken: null,
+              refreshToken: null,
+              isAuthenticated: false,
+              isLoading: false,
+            });
+          }
+        } else {
+          // No hay tokens, establecer como no autenticado
+          set({ isLoading: false });
+        }
       },
     }),
     {

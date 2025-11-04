@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import Layout from './components/Layout';
@@ -8,10 +8,15 @@ import Incidencias from './pages/Incidencias';
 import Inventario from './pages/Inventario';
 import Mantenimiento from './pages/Mantenimiento';
 import Mapa from './pages/Mapa';
+import Perfil from './pages/Perfil';
 import LoadingSpinner from './components/LoadingSpinner';
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -30,6 +35,7 @@ function App() {
         <Route path="/inventario" element={<Inventario />} />
         <Route path="/mantenimiento" element={<Mantenimiento />} />
         <Route path="/mapa" element={<Mapa />} />
+        <Route path="/perfil" element={<Perfil />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Layout>

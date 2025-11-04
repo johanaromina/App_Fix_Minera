@@ -58,6 +58,9 @@
         }
       ]
     ],
-    "scheme": "tfg-mineria"
+    "scheme": "tfg-mineria",
+    "env": {
+      "EXPO_ROUTER_APP_ROOT": "./app"
+    }
   }
 }

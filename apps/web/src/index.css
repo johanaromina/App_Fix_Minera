@@ -2,7 +2,7 @@
 
 :root {
   --primary-color: #2c3e50;
-  --secondary-color: #3498db;
+  --secondary-color: #0a183669;
   --success-color: #27ae60;
   --warning-color: #f39c12;
   --danger-color: #e74c3c;
@@ -60,6 +60,60 @@ code {
 .sidebar {
   min-height: 100vh;
   background-color: var(--primary-color);
+}
+
+/* App Layout using CSS Grid */
+.app-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 1fr;
+  min-height: 100vh;
+  transition: grid-template-columns 0.3s ease-in-out;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Show sidebar by default on large screens */
+@media (min-width: 992px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+  
+  /* When sidebar is closed on desktop */
+  .app-layout.sidebar-closed {
+    grid-template-columns: 0 1fr;
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 991px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
+  }
 }
 
 .sidebar .nav-link {

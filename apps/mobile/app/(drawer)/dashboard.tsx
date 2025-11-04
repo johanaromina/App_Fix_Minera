@@ -348,7 +348,11 @@ export default function DashboardScreen() {
             <View key={index} style={styles.metricItem}>
               <View style={styles.metricHeader}>
                 <Text style={styles.metricLabel}>{metric.label}</Text>
-                <View style={[styles.metricStatus, styles[`status${metric.status}`]]}>
+                <View style={[
+                  styles.metricStatus, 
+                  metric.status === 'excellent' ? styles.statusexcellent :
+                  metric.status === 'good' ? styles.statusgood : styles.statuswarning
+                ]}>
                   <Ionicons 
                     name={metric.status === 'excellent' ? 'checkmark-circle' : 
                           metric.status === 'good' ? 'checkmark' : 'warning'} 

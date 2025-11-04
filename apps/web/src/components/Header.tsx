@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navbar, Nav, Dropdown, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Bell, User, LogOut } from 'lucide-react';
 
 interface User {
@@ -16,12 +17,14 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onLogout, user }) => {
+  const navigate = useNavigate();
+
   return (
     <Navbar bg="white" expand="lg" className="border-bottom shadow-sm">
       <div className="d-flex align-items-center">
         <Button
           variant="outline-secondary"
-          className="d-lg-none me-3"
+          className="me-3"
           onClick={onToggleSidebar}
         >
           <Menu size={20} />
@@ -61,12 +64,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onLogout, user }) => {
               
               <Dropdown.Divider />
               
-              <Dropdown.Item>
+              <Dropdown.Item onClick={() => navigate('/perfil')}>
                 <User className="me-2" size={16} />
                 Perfil
               </Dropdown.Item>
               
-              <Dropdown.Item>
+              <Dropdown.Item disabled>
                 Configuración
               </Dropdown.Item>
               

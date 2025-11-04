@@ -59,15 +59,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       
       {/* Sidebar */}
       <div 
-        className={`sidebar position-fixed top-0 start-0 h-100 d-flex flex-column ${
+        className={`sidebar d-flex flex-column ${
           isOpen ? 'show' : ''
         }`}
-        style={{ 
-          width: '250px', 
-          zIndex: 1050,
-          transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.3s ease-in-out'
-        }}
       >
         {/* Logo */}
         <div className="p-3 border-bottom border-secondary">

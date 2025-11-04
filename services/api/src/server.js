@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const incidenciasRoutes = require('./routes/incidencias');
 const inventarioRoutes = require('./routes/inventario');
 const mantenimientoRoutes = require('./routes/mantenimiento');
+const sensoresRoutes = require('./routes/sensores');
 const iotRoutes = require('./routes/iot');
 
 const app = express();
@@ -74,6 +75,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/incidencias', incidenciasRoutes);
 app.use('/api/inventario', inventarioRoutes);
 app.use('/api/mantenimiento', mantenimientoRoutes);
+app.use('/api/sensores', sensoresRoutes);
 app.use('/api/iot', iotRoutes);
 
 // 404 handler

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Navbar, Nav, Button } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { useAuthStore } from '../store/authStore';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -9,7 +9,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout } = useAuthStore();
 
   const toggleSidebar = () => {
@@ -21,12 +21,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="d-flex">
+    <div className={`app-layout ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex flex-column">
+      <div className="main-content">
         {/* Header */}
         <Header 
           onToggleSidebar={toggleSidebar}
@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         />
         
         {/* Page Content */}
-        <main className="flex-grow-1">
+        <main className="page-content">
           <Container fluid className="py-4">
             {children}
           </Container>

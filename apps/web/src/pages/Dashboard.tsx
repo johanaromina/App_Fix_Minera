@@ -9,8 +9,87 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const Dashboard: React.FC = () => {
+  // Datos para gráficos
+  const incidentsData = {
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    datasets: [
+      {
+        label: 'Incidencias',
+        data: [12, 19, 3, 5, 2, 3],
+        borderColor: '#e74c3c',
+        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const maintenanceData = {
+    labels: ['Completados', 'Pendientes', 'Vencidos', 'Cancelados'],
+    datasets: [
+      {
+        data: [45, 25, 15, 5],
+        backgroundColor: [
+          '#27ae60',
+          '#f39c12',
+          '#e74c3c',
+          '#7f8c8d',
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+      },
+    ],
+  };
+
+  const efficiencyData = {
+    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+    datasets: [
+      {
+        label: 'Eficiencia (%)',
+        data: [92, 94, 88, 96, 93, 89, 95],
+        backgroundColor: '#3498db',
+        borderColor: '#2980b9',
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+    },
+  };
+
   const stats = [
     {
       title: 'Incidencias Activas',
@@ -115,9 +194,48 @@ const Dashboard: React.FC = () => {
         })}
       </Row>
 
-      <Row>
-        {/* Recent Activities */}
+      {/* Gráficos */}
+      <Row className="mb-4">
         <Col lg={8}>
+          <Card className="card-custom">
+            <Card.Header>
+              <h5 className="mb-0">Tendencia de Incidencias</h5>
+            </Card.Header>
+            <Card.Body>
+              <div style={{ height: '300px' }}>
+                <Line data={incidentsData} options={chartOptions} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={4}>
+          <Card className="card-custom">
+            <Card.Header>
+              <h5 className="mb-0">Estado de Mantenimientos</h5>
+            </Card.Header>
+            <Card.Body>
+              <div style={{ height: '300px' }}>
+                <Doughnut data={maintenanceData} options={chartOptions} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row className="mb-4">
+        <Col lg={6}>
+          <Card className="card-custom">
+            <Card.Header>
+              <h5 className="mb-0">Eficiencia Semanal</h5>
+            </Card.Header>
+            <Card.Body>
+              <div style={{ height: '250px' }}>
+                <Bar data={efficiencyData} options={chartOptions} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={6}>
           <Card className="card-custom">
             <Card.Header>
               <h5 className="mb-0">Actividad Reciente</h5>
@@ -147,15 +265,17 @@ const Dashboard: React.FC = () => {
             </Card.Body>
           </Card>
         </Col>
+      </Row>
 
+      <Row>
         {/* Quick Actions */}
-        <Col lg={4}>
+        <Col lg={12}>
           <Card className="card-custom">
             <Card.Header>
               <h5 className="mb-0">Acciones Rápidas</h5>
             </Card.Header>
             <Card.Body>
-              <div className="d-grid gap-2">
+              <div className="d-grid gap-2 d-md-flex">
                 <button className="btn btn-outline-primary">
                   <TriangleAlert className="me-2" size={16} />
                   Reportar Incidencia

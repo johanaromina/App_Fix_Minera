@@ -7,7 +7,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "module": "esnext",
@@ -34,6 +33,4 @@
     "node_modules"
   ],
   "extends": "expo/tsconfig.base"
-
-
 }

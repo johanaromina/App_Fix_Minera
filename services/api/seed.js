@@ -7,11 +7,11 @@ async function main() {
 
   // Crear conexión a la base de datos
   const connection = await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'tfg_mineria',
-    port: process.env.DB_PORT || 3306,
+    host: 'localhost',
+    user: 'root',
+    password: '1234',
+    database: 'APP_Fix_Minera',
+    port: 3306,
   });
 
   try {
@@ -155,12 +155,76 @@ async function main() {
         codigo_qr: 'QR-TRI-001',
         estado: 'mantenimiento',
       },
+      {
+        id: 'item-004',
+        sitio_id: 2,
+        tipo: 'Compresor',
+        marca: 'Atlas Copco',
+        modelo: 'GA37',
+        nro_serie: 'AC902341',
+        codigo_qr: 'QR-COM-001',
+        estado: 'operativo',
+      },
+      {
+        id: 'item-005',
+        sitio_id: 1,
+        tipo: 'Generador',
+        marca: 'Cummins',
+        modelo: 'QSK60',
+        nro_serie: 'CU567890',
+        codigo_qr: 'QR-GEN-001',
+        estado: 'fuera_de_servicio',
+      }
     ];
 
     for (const item of inventarioItems) {
       await connection.execute(
-        'INSERT IGNORE INTO inventario_items (id, sitio_id, tipo, marca, modelo, nro_serie, codigo_qr, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        `INSERT INTO inventario_items (id, sitio_id, tipo, marca, modelo, nro_serie, codigo_qr, estado, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+         ON DUPLICATE KEY UPDATE 
+         tipo = VALUES(tipo), 
+         marca = VALUES(marca), 
+         modelo = VALUES(modelo), 
+         nro_serie = VALUES(nro_serie),
+         estado = VALUES(estado),
+         updated_at = NOW()`,
         [item.id, item.sitio_id, item.tipo, item.marca, item.modelo, item.nro_serie, item.codigo_qr, item.estado]
+      );
+    }
+
+    // Crear planes de mantenimiento
+    console.log('🔧 Creando planes de mantenimiento...');
+    const planes = [
+      {
+        id: 'plan-001',
+        nombre: 'Mantenimiento Preventivo Bombas',
+        descripcion: 'Revisión mensual de bombas principales',
+        frecuencia: 'mensual',
+      },
+      {
+        id: 'plan-002',
+        nombre: 'Revisión Mensual Equipos',
+        descripcion: 'Inspección general de equipos críticos',
+        frecuencia: 'mensual',
+      },
+      {
+        id: 'plan-003',
+        nombre: 'Mantenimiento Motor',
+        descripcion: 'Lubricación y revisión de motores',
+        frecuencia: 'trimestral',
+      },
+      {
+        id: 'plan-004',
+        nombre: 'Calibración Válvulas',
+        descripcion: 'Calibración de sistemas de válvulas',
+        frecuencia: 'semestral',
+      },
+    ];
+
+    for (const plan of planes) {
+      await connection.execute(
+        'INSERT IGNORE INTO planes_mantenimiento (id, nombre, descripcion, frecuencia) VALUES (?, ?, ?, ?)',
+        [plan.id, plan.nombre, plan.descripcion, plan.frecuencia]
       );
     }
 
@@ -170,7 +234,7 @@ async function main() {
       {
         id: 'inc-001',
         titulo: 'Falla en sistema hidráulico',
-        descripcion: 'La excavadora presenta pérdida de presión en el sistema hidráulico',
+        descripcion: 'La excavadora presenta pérdida de presión en el sistema hidráulico. Se requiere intervención inmediata para evitar daños mayores.',
         prioridad: 'alta',
         estado: 'abierta',
         usuario_reporta_id: 'oper-001',
@@ -179,19 +243,161 @@ async function main() {
       {
         id: 'inc-002',
         titulo: 'Ruido anormal en trituradora',
-        descripcion: 'Se detecta ruido anormal en la trituradora principal',
+        descripcion: 'Se detecta ruido anormal en la trituradora principal. Posible desgaste en los rodamientos.',
         prioridad: 'media',
         estado: 'en_proceso',
         usuario_reporta_id: 'oper-001',
         usuario_atiende_id: 'tec-001',
         sitio_id: 2,
       },
+      {
+        id: 'inc-003',
+        titulo: 'Fuga de aceite en motor principal',
+        descripcion: 'Detectada fuga significativa de aceite en el motor principal de la excavadora. Se observa mancha en el suelo.',
+        prioridad: 'critica',
+        estado: 'abierta',
+        usuario_reporta_id: 'oper-001',
+        sitio_id: 1,
+      },
+      {
+        id: 'inc-004',
+        titulo: 'Sistema de iluminación defectuoso',
+        descripcion: 'Multiple bombillas fundidas en el área de procesamiento. Riesgo de seguridad durante horarios nocturnos.',
+        prioridad: 'media',
+        estado: 'abierta',
+        usuario_reporta_id: 'super-001',
+        sitio_id: 2,
+      },
+      {
+        id: 'inc-005',
+        titulo: 'Banda transportadora fuera de línea',
+        descripcion: 'La banda transportadora principal se detuvo inesperadamente. Producción suspendida temporalmente.',
+        prioridad: 'alta',
+        estado: 'en_proceso',
+        usuario_reporta_id: 'oper-001',
+        usuario_atiende_id: 'tec-001',
+        sitio_id: 2,
+      },
+      {
+        id: 'inc-006',
+        titulo: 'Válvula de seguridad bloqueada',
+        descripcion: 'Válvula de seguridad del sistema neumático no responde. Inspección requerida.',
+        prioridad: 'alta',
+        estado: 'abierta',
+        usuario_reporta_id: 'tec-001',
+        sitio_id: 3,
+      },
+      {
+        id: 'inc-007',
+        titulo: 'Software de monitoreo desactualizado',
+        descripcion: 'El software de monitoreo requiere actualización crítica para mantener compatibilidad.',
+        prioridad: 'baja',
+        estado: 'abierta',
+        usuario_reporta_id: 'admin-001',
+        sitio_id: 3,
+      },
+      {
+        id: 'inc-008',
+        titulo: 'Temperatura elevada en compresor',
+        descripcion: 'Sensor reporta temperatura 10°C por encima de lo normal. Revisión preventiva recomendada.',
+        prioridad: 'media',
+        estado: 'cerrada',
+        usuario_reporta_id: 'oper-001',
+        usuario_atiende_id: 'tec-001',
+        sitio_id: 1,
+      },
+      {
+        id: 'inc-009',
+        titulo: 'Cable de alimentación dañado',
+        descripcion: 'Cable de alimentación principal presenta deterioro visible. Potencial riesgo eléctrico.',
+        prioridad: 'critica',
+        estado: 'abierta',
+        usuario_reporta_id: 'super-001',
+        sitio_id: 2,
+      },
+      {
+        id: 'inc-010',
+        titulo: 'Filtro de aire obstruido',
+        descripcion: 'Filtro de aire principal requiere reemplazo. Impacto en rendimiento del motor.',
+        prioridad: 'baja',
+        estado: 'cerrada',
+        usuario_reporta_id: 'tec-001',
+        usuario_atiende_id: 'tec-001',
+        sitio_id: 1,
+      },
     ];
 
     for (const incidencia of incidencias) {
       await connection.execute(
-        'INSERT IGNORE INTO incidencias (id, titulo, descripcion, prioridad, estado, usuario_reporta_id, usuario_atiende_id, sitio_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        `INSERT INTO incidencias (id, titulo, descripcion, prioridad, estado, usuario_reporta_id, usuario_atiende_id, sitio_id, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+         ON DUPLICATE KEY UPDATE 
+         titulo = VALUES(titulo), 
+         descripcion = VALUES(descripcion), 
+         prioridad = VALUES(prioridad), 
+         estado = VALUES(estado),
+         updated_at = NOW()`,
         [incidencia.id, incidencia.titulo, incidencia.descripcion, incidencia.prioridad, incidencia.estado, incidencia.usuario_reporta_id, incidencia.usuario_atiende_id || null, incidencia.sitio_id]
+      );
+    }
+
+    // Crear sensores IoT
+    console.log('🔌 Creando sensores IoT...');
+    const sensores = [
+      {
+        id: 'sensor-001',
+        sitio_id: 1,
+        tipo: 'temperatura',
+        descripcion: 'Sensor de temperatura en sala de máquinas',
+        activo: true
+      },
+      {
+        id: 'sensor-002',
+        sitio_id: 1,
+        tipo: 'vibracion',
+        descripcion: 'Sensor de vibración en bomba principal',
+        activo: true
+      },
+      {
+        id: 'sensor-003',
+        sitio_id: 2,
+        tipo: 'energia',
+        descripcion: 'Medidor de consumo energético',
+        activo: true
+      },
+      {
+        id: 'sensor-004',
+        sitio_id: 1,
+        tipo: 'presion',
+        descripcion: 'Sensor de presión en línea principal',
+        activo: true
+      },
+      {
+        id: 'sensor-005',
+        sitio_id: 2,
+        tipo: 'humedad',
+        descripcion: 'Sensor de humedad ambiental',
+        activo: true
+      },
+      {
+        id: 'sensor-006',
+        sitio_id: 2,
+        tipo: 'flujo',
+        descripcion: 'Sensor de flujo en tubería',
+        activo: true
+      }
+    ];
+
+    for (const sensor of sensores) {
+      await connection.execute(
+        `INSERT INTO sensores (id, sitio_id, tipo, descripcion, activo, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+         ON DUPLICATE KEY UPDATE 
+         tipo = VALUES(tipo), 
+         descripcion = VALUES(descripcion), 
+         activo = VALUES(activo),
+         updated_at = NOW()`,
+        [sensor.id, sensor.sitio_id, sensor.tipo, sensor.descripcion, sensor.activo]
       );
     }
 

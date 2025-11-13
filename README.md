@@ -128,7 +128,7 @@ npm run api:dev
 # Terminal 2: Frontend Web
 npm run web:dev
 
-# Terminal 3: App Móvil (opcional)
+# Terminal 3: App Móvil 
 npm run mobile:dev
 ```
 
